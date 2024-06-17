@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+</body>
+<script src="../wasm_exec.js"></script>
+<script>
+    window.timer = function (name, cb) {
+        const now = performance.now()
+        const v = cb()
+        console.log(`------------------------------------------`)
+        console.log(`${name}: ${performance.now() - now} ms`)
+        console.log(`result is ${v}`)
+        console.log(`------------------------------------------`)
+    }
+</script>
+<script>
+    window.N = 50
+</script>
+<script>
+    const go = new Go();
+    WebAssembly.instantiateStreaming(fetch("../main.wasm"), go.importObject)
+        .then((result) => {
+            go.run(result.instance)
+            timer('wasm-fib', () => fibonacci(N))
+        });
+</script>
+<script>
+    const fib = function (n) {
+        if (n < 0) return 0
+        if (n === 1 || n === 2) return 1
+        return fib(n - 1) + fib(n - 2)
+    }
+
+    timer('js-fib', () => fib(N))
+</script>
+</html>
